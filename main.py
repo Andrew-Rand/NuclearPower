@@ -1,10 +1,12 @@
 import asyncio
+from functools import partial
 
 import pydantic
 
 REACTIVITY = 1
-TEMPERATURE = 0
-STEAM_PRESSURE = 0
+TEMPERATURE = 1
+WATER_PRESSURE = 1
+STEAM_PRESSURE = 1
 
 
 class RiseRods(pydantic.BaseModel):
@@ -13,6 +15,7 @@ class RiseRods(pydantic.BaseModel):
 
 
 async def rise_rods(event: RiseRods) -> None:
+    await asyncio.sleep(5)
     global REACTIVITY
     REACTIVITY *= event.level
 
@@ -23,23 +26,36 @@ MAPPER = {
 
 async def tick(queue: asyncio.Queue) -> None:
     while True:
-        global REACTIVITY
-        print(REACTIVITY)
         task = await queue.get()
 
-        await asyncio.sleep(3)
+        print('start')
 
         processor = MAPPER.get(type(task))
         if processor:
-            await processor(task)
-        queue.task_done()
+            asyncio.create_task(processor(task))
+            queue.task_done()
+        print('finish')
+
+
+async def conditions():
+    global REACTIVITY
+    global TEMPERATURE
+    global WATER_PRESSURE
+    global STEAM_PRESSURE
+
+    while True:
+        await asyncio.sleep(1)
+        TEMPERATURE = REACTIVITY / WATER_PRESSURE
+        STEAM_PRESSURE = TEMPERATURE * WATER_PRESSURE
+
+        print(f'Reactivity: {REACTIVITY}, Temperature: {TEMPERATURE}, Steam pressure: {STEAM_PRESSURE}')
 
 
 async def add_task(queue: asyncio.Queue) -> None:
     while True:
         # Example
-        await asyncio.sleep(1)
-        queue.put_nowait(RiseRods(level=3))
+        await asyncio.sleep(2)
+        queue.put_nowait(RiseRods(level=2))
 
 
 
@@ -49,6 +65,7 @@ async def main():
 
     # example
     asyncio.create_task(add_task(queue))
+    asyncio.create_task(conditions())
     # ............
 
     await asyncio.gather(queue.join(), worker)
