@@ -10,6 +10,9 @@ class Reactor(BaseUnit):
     water_pressure: int
     steam_pressure: float
 
+    # TODO: time after refuel (reactivity decrease)
+    # TODO: ksenon (reactivity decrease)
+
 
     def __init__(
             self,
@@ -38,7 +41,11 @@ class Reactor(BaseUnit):
 
     async def update_conditions(self):
         self.reactivity = self.roads_level
-        self.temperature = self.reactivity / self.water_pressure
+        temperature_factor = self.reactivity - self.water_pressure / 100
+        if self.temperature + temperature_factor < 0:
+            self.temperature = 0
+        else:
+            self.temperature += temperature_factor
         self.steam_pressure = self.temperature * self.water_pressure
 
         print(f'Level: {self.roads_level}, Reactivity: {self.reactivity}, Temperature: {self.temperature}, Steam pressure: {self.steam_pressure}')
