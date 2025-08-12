@@ -1,8 +1,4 @@
-from reactor.events import RiseRods, LowerRods, ReactorAZ
-from reactor.handlers import rise_rods, lower_rods, stop_reactor
-
+# TODO: events (Pydantic classes, BaseUnitEvet in core) and handlers (functions) here
 MAPPER = {
-    RiseRods: rise_rods,
-    LowerRods: lower_rods,
-    ReactorAZ: stop_reactor,
+    # Event: handler
 }
