@@ -2,6 +2,7 @@ import asyncio
 
 from constants import ROADS_ENDS_EFFECT
 from core.unit import BaseUnit
+from station.reactor.schemas import WarningEvent, CriticalEvent
 
 
 class Reactor(BaseUnit):
@@ -15,6 +16,9 @@ class Reactor(BaseUnit):
     road_ends_effect: float
 
     current_task: asyncio.Task | None
+
+    warnings = list[WarningEvent]
+    critical = list[CriticalEvent]
 
     # TODO: time after refuel (reactivity decrease)
     # TODO: ksenon (reactivity decrease)
@@ -37,6 +41,9 @@ class Reactor(BaseUnit):
         self.xenon_level = 0
         self.road_ends_effect = 0
 
+        self.warnings = []
+        self.critical = []
+
         self.current_task = None
 
 
@@ -48,16 +55,35 @@ class Reactor(BaseUnit):
             'temperature': self.temperature,
             'water_pressure': self.water_pressure,
             'steam_pressure': self.steam_pressure,
+            'xenon_level': self.xenon_level,
+            'warnings': self.warnings,
+            'critical': self.critical,
         }
 
+
+    def check_warnings(self):
+        # need to check already added and remove if all good
+        # create events
+        pass
+
+
+    def check_critical(self):
+        # do not return critical
+        # its over
+        pass
+
+
     async def update_conditions(self):
-        self.reactivity = self.roads_level * 10 - self.xenon_level + self.road_ends_effect
+        self.reactivity = self.roads_level * 10 - self.xenon_level + self.road_ends_effect * self.roads_level
         temperature_factor = self.reactivity - self.water_pressure / 100
         if self.temperature + temperature_factor < 0:
             self.temperature = 0
         else:
             self.temperature += temperature_factor
         self.steam_pressure = self.temperature * self.water_pressure
+
+        self.check_warnings()
+        self.check_critical()
 
         print(f'Level: {self.roads_level}, Reactivity: {self.reactivity}, Temperature: {self.temperature}, Steam pressure: {self.steam_pressure}')
 
