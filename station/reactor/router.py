@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from station.reactor.schemas import ReactorConditionsResponse, SetRoadsLevelRequest, SetRoadsLevelResponse
+from station.reactor.schemas import ReactorConditionsResponse, SetRoadsLevelRequest, SetRoadsLevelResponse, \
+    SetWaterLevelResponse, SetWaterLevelRequest
 from main import station
 
 
@@ -22,3 +23,9 @@ async def get_reactor_conditions():
 async def set_road_level(data: SetRoadsLevelRequest):
     await station.reactor.set_roads_level(data.level)
     return {'info': 'ok', 'current_level': station.reactor.roads_level}
+
+
+@reactor_router.post('/water-pressure', response_model=SetWaterLevelResponse)
+async def set_road_level(data: SetWaterLevelRequest):
+    await station.reactor.set_water_level(data.level)
+    return {'info': 'ok', 'current_level': station.reactor.water_pressure}

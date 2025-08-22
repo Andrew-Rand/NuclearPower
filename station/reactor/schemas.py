@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class WarningEvent(BaseModel):
@@ -21,10 +21,34 @@ class ReactorConditionsResponse(BaseModel):
     critical: list[CriticalEvent]
 
 
-class SetRoadsLevelRequest(BaseModel):
+class BaseSetLevelRequest(BaseModel):
     level: int
 
 
-class SetRoadsLevelResponse(BaseModel):
+class SetRoadsLevelRequest(BaseSetLevelRequest):
+    @field_validator('level')
+    def validate_level(cls, value):
+        if value < 0 or value > 10:
+            raise ValueError('Roads level must be between 0 and 10')
+        return value
+
+
+class SetWaterLevelRequest(BaseSetLevelRequest):
+    @field_validator('level')
+    def validate_level(cls, value):
+        if value < 1 or value > 100:
+            raise ValueError('Water pressure must be between 1 and 100')
+        return value
+
+
+class BaseLevelResponse(BaseModel):
     info: str
     current_level: int
+
+class SetRoadsLevelResponse(BaseLevelResponse):
+    ...
+
+
+class SetWaterLevelResponse(BaseLevelResponse):
+    ...
+
