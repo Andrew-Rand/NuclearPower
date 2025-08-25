@@ -18,7 +18,7 @@ class Page(QWidget):
         layout.addWidget(back_button)
         self.setLayout(layout)
 
-        # TODO add here requests from windows commit
+        # TODO add here requests all from example with requests
         # use method show_allert_and_return if critical
         # use method show_allert if warning
         # self.show_alert_and_return()
